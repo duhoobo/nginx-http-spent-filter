@@ -66,8 +66,8 @@ Notes
 * Avoid using standard headers or Nginx pre-defined headers. Nginx may hide them
   from downstream.
 
-* Nginx timestamps fetched by `ngx_timeofday` are not produced imediately by
-  *syscall* s. They are from some cache, actually. So you may observe finish-time
-  equals to start-time quite often if you request is processed very quickly. 
+* Nginx timestamps returned by `ngx_timeofday` are not produced in real-time by
+  *syscall* s. They are from a cache, actually. So you may observe finish-time
+  equals to start-time quite often if your request is processed very quickly. 
 
 
