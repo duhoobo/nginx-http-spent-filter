@@ -187,7 +187,7 @@ ngx_http_spent_header_filter(ngx_http_request_t *r)
                      &slcf->prefix, tp->sec % 1000, tp->msec);
 
         headers[i].value.data = value;
-        headers[i].value.len = value_len;
+        headers[i].value.len = value_len - 1;
 
     } else {
 
@@ -212,7 +212,7 @@ ngx_http_spent_header_filter(ngx_http_request_t *r)
         h->key.data = slcf->header.data;
         h->key.len = slcf->header.len;
         h->value.data = value;
-        h->value.len = value_len;
+        h->value.len = value_len - 1;
         h->lowcase_key = slcf->header_lc.data;
     }
 
