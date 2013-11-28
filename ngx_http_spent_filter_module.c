@@ -29,8 +29,6 @@ static char * ngx_http_spent_set_mode(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
 static char * ngx_http_spent_set_header(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
-static char * ngx_http_spent_set_prefix(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
 static void * ngx_http_spent_create_loc_conf(ngx_conf_t *cf);
 static char * ngx_http_spent_merge_loc_conf(ngx_conf_t *cf, void *parent, 
     void *child);
@@ -55,7 +53,7 @@ static ngx_command_t ngx_http_spent_filter_commands[] = {
 
     { ngx_string("spent_prefix"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_http_spent_set_prefix,
+      ngx_conf_set_str_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_spent_loc_conf_t, prefix),
       NULL },
@@ -172,16 +170,16 @@ ngx_http_spent_header_filter(ngx_http_request_t *r)
 
     if (found) {
 
-        value_len = slcf->prefix.len + sizeof("000.000000;") - 1 
+        value_len = slcf->prefix.len + sizeof("000.000;") - 1 
                     + headers[i].value.len + sizeof(";") - 1 
-                    + slcf->prefix.len + sizeof("000.000000") - 1 + 1;
+                    + slcf->prefix.len + sizeof("000.000") - 1 + 1;
 
         value = ngx_pcalloc(r->pool, value_len);
         if (value == NULL) {
             return NGX_ERROR;
         }
 
-        ngx_snprintf(value, value_len, "%V%03d.%06d;%V;%V%03d.%06d",
+        ngx_snprintf(value, value_len, "%V%03d.%03d;%V;%V%03d.%03d",
                      &slcf->prefix, r->start_sec % 1000, r->start_msec,
                      &headers[i].value, 
                      &slcf->prefix, tp->sec % 1000, tp->msec);
@@ -191,15 +189,15 @@ ngx_http_spent_header_filter(ngx_http_request_t *r)
 
     } else {
 
-        value_len = slcf->prefix.len + sizeof("000.000000;") - 1
-                    + slcf->prefix.len + sizeof("000.000000") - 1 + 1;
+        value_len = slcf->prefix.len + sizeof("000.000;") - 1
+                    + slcf->prefix.len + sizeof("000.000") - 1 + 1;
         
         value = ngx_pcalloc(r->pool, value_len);
         if (value == NULL) {
             return NGX_ERROR;
         }
 
-        ngx_snprintf(value, value_len, "%V%03d.%06d;%V%03d.%06d",
+        ngx_snprintf(value, value_len, "%V%03d.%03d;%V%03d.%03d",
                      &slcf->prefix, r->start_sec % 1000, r->start_msec,
                      &slcf->prefix, tp->sec % 1000, tp->msec);
 
@@ -253,39 +251,23 @@ ngx_http_spent_set_mode(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 static char *
 ngx_http_spent_set_header(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
+    char *rv;
     ngx_http_spent_loc_conf_t *slcf = conf;
 
-    if (slcf->header.len) {
-        return "is duplicate";
-    }
-
-    if (ngx_conf_set_str_slot(cf, cmd, conf) != NGX_CONF_OK) {
-        return NGX_CONF_ERROR;
+    if ((rv = ngx_conf_set_str_slot(cf, cmd, conf)) != NGX_CONF_OK) {
+        return rv;
     }
 
     slcf->header_lc.len = slcf->header.len;
     slcf->header_lc.data = ngx_pcalloc(cf->pool, slcf->header_lc.len + 1);
     if (slcf->header_lc.data == NULL) {
-        return NGX_CONF_ERROR;
+        return "alloc for header_lc error";
     }
 
     slcf->header_hash = ngx_hash_strlow(slcf->header_lc.data, slcf->header.data,
                                         slcf->header.len);
 
     return NGX_CONF_OK;
-}
-
-
-static char *
-ngx_http_spent_set_prefix(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
-{
-    ngx_http_spent_loc_conf_t *slcf = conf;
-
-    if (slcf->prefix.len) {
-        return "is duplicate";
-    }
-
-    return ngx_conf_set_str_slot(cf, cmd, conf);
 }
 
 
