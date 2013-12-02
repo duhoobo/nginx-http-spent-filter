@@ -300,7 +300,7 @@ ngx_http_spent_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_str_value(conf->header_lc, prev->header, "x-spent");
     ngx_conf_merge_uint_value(conf->header_hash, prev->header_hash,
                               ngx_hash_key_lc((u_char *) "X-Spent", 
-                                               sizeof("X-Spent") - 1))
+                                               sizeof("X-Spent") - 1));
 
     ngx_conf_merge_str_value(conf->prefix, prev->prefix, "p");
 
