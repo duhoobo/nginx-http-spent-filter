@@ -6,6 +6,7 @@ use Test::Nginx::Socket;
 repeat_each(2);
 
 plan tests => 36;
+plan tests => repeat_each() * 18;
 
 #master_on();
 #workers(2);
