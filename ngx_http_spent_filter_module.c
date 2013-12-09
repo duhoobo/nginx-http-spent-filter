@@ -159,12 +159,12 @@ ngx_http_spent_header_filter(ngx_http_request_t *r)
         break;
     }
 
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                   "http spent filter found: %d", found);
+
     if (!found && slcf->mode == NGX_HTTP_SPENT_MODE_PASSIVE) {
         return ngx_http_next_header_filter(r);
     }
-
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http spent filter found: %d", found);
 
     tp = ngx_timeofday();
 
@@ -297,7 +297,7 @@ ngx_http_spent_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_value(conf->mode, prev->mode, NGX_HTTP_SPENT_MODE_OFF);
 
     ngx_conf_merge_str_value(conf->header, prev->header, "X-Spent");
-    ngx_conf_merge_str_value(conf->header_lc, prev->header, "x-spent");
+    ngx_conf_merge_str_value(conf->header_lc, prev->header_lc, "x-spent");
     ngx_conf_merge_uint_value(conf->header_hash, prev->header_hash,
                               ngx_hash_key_lc((u_char *) "X-Spent", 
                                                sizeof("X-Spent") - 1));
